@@ -3,43 +3,52 @@
 # image will be published to ghcr.io/<user>/<name>
 name: bluesugar
 # description will be included in the image's metadata
-description: This is my personal OS image.
+description: The Sugar desktop as a image
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/silverblue-main
+base-image: ghcr.io/ublue-os/base-main
 image-version: latest # You can pin to a specific version of Fedora as well
 
 # module configuration, executed in order
 # you can include multiple instances of the same module
 modules:
-  - type: files
-    files:
-      - source: system
-        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+  # - type: files
+  #   files:
+  #     - source: system
+  #       destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
   - type: dnf
-    repos:
-      copr:
-        - atim/starship
+    group-install:
+      packages:
+        - sugar-desktop-environment # Fedora's comps group: Sugar plus bundled activities
+    # repos:
+    #   copr:
     install:
       packages:
-        - micro
-        - starship
-    remove:
-      packages:
-        # example: removing firefox (in favor of the flatpak)
-        # "firefox" is the main package, "firefox-langpacks" is a dependency
-        - firefox
-        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+        - lightdm
+        - lightdm-gtk
+        - network-manager-applet
+        - pipewire-pulseaudio
+        - wireplumber
+    # remove:
+    #   packages:
+    #     # example: removing firefox (in favor of the flatpak)
+    #     # "firefox" is the main package, "firefox-langpacks" is a dependency    
 
-  - type: default-flatpaks
-    configurations:
-      - notify: true # Send notification after install/uninstall is finished (true/false)
-        scope: system
-        # If no repo information is specified, Flathub will be used by default
-        install: # system flatpaks we want all users to have and not remove
-          - org.mozilla.firefox
-          - org.gnome.Loupe
-      - scope: user # Also add Flathub user repo, but no user packages
+  - type: systemd
+    system:
+      enabled:
+        - lightdm.service
+      default-target: graphical.target # Not all BlueBuild versions support this key; remove if the build complains
+
+  # - type: default-flatpaks
+  #   configurations:
+  #     - notify: true # Send notification after install/uninstall is finished (true/false)
+  #       scope: system
+  #       # If no repo information is specified, Flathub will be used by default
+  #       install: # system flatpaks we want all users to have and not remove
+  #         - org.mozilla.firefox
+  #         - org.gnome.Loupe
+  #     - scope: user # Also add Flathub user repo, but no user packages
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
