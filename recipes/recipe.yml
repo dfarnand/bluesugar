@@ -19,6 +19,7 @@ modules:
 
   - type: dnf
     group-install:
+      with-optional: true
       packages:
         - sugar-desktop-environment # Fedora's comps group: Sugar plus bundled activities
     # repos:
